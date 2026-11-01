@@ -8,6 +8,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@musicroom/shared": "*",
     "@hono/node-server": "^2.1.5",
     "@hono/zod-validator": "^0.9.1",
     "bcryptjs": "^3.0.3",

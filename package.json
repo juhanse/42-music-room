@@ -1,0 +1,9 @@
+{
+  "name": "42-music-room",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "mobile",
+    "packages/*"
+  ]
+}
