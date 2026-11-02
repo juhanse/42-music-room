@@ -16,4 +16,4 @@ WORKDIR /app/backend
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm run db:push && npm run dev"]
