@@ -12,9 +12,9 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
 
-  mailhog:
-    image: mailhog/mailhog
-    container_name: music-room-mailhog
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: music-room-mailpit
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -31,11 +31,11 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-music_room}
-      SMTP_HOST: mailhog
+      SMTP_HOST: mailpit
       SMTP_PORT: 1025
     depends_on:
       - db
-      - mailhog
+      - mailpit
     restart: unless-stopped
 
 volumes:
