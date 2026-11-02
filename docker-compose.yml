@@ -12,6 +12,14 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
 
+  mailhog:
+    image: mailhog/mailhog
+    container_name: music-room-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -23,8 +31,11 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-music_room}
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
     depends_on:
       - db
+      - mailhog
     restart: unless-stopped
 
 volumes:
