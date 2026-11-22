@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, TextInput, Button, Pressable, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { ThemedView } from '../components/themed-view';
 import { ThemedText } from '../components/themed-text';
 import { useAuthStore } from '../store/authStore';
@@ -12,6 +13,12 @@ export default function LoginScreen() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const login = useAuthStore((state) => state.login);
 	const router = useRouter();
+
+	useEffect(() => {
+		GoogleSignin.configure({
+			webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+		});
+	}, []);
 
 	const handleLogin = async () => {
 		setErrorMessage('');
@@ -45,8 +52,23 @@ export default function LoginScreen() {
 		}
 	};
 
-	const handleGoogleLogin = () => {
-		setErrorMessage('Intégration du SDK Google OAuth à réaliser.');
+	const handleGoogleLogin = async () => {
+		setErrorMessage('');
+		try {
+			await GoogleSignin.hasPlayServices();
+			const response = await GoogleSignin.signIn();
+
+			if (response.type === 'success' && response.data?.idToken) {
+				const apiResponse = await api.post('/auth/google', { idToken: response.data.idToken });
+				await login(apiResponse.data.token, apiResponse.data.user);
+				router.replace('/');
+			} else if (response.type === 'cancelled') {
+				setErrorMessage('Connexion annulée.');
+			}
+		} catch (error: any) {
+			setErrorMessage('Erreur lors de la connexion avec Google.');
+			console.error(error);
+		}
 	};
 
 	return (

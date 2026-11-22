@@ -5,6 +5,7 @@
   "dependencies": {
     "@expo/ui": "~58.0.26",
     "@musicroom/shared": "*",
+    "@react-native-google-signin/google-signin": "^17.0.0",
     "axios": "^1.21.0",
     "expo": "~58.0.22",
     "expo-constants": "~58.0.14",
