@@ -10,18 +10,21 @@ import { sendValidationEmail, sendPasswordResetEmail } from '../utils/mailer.js'
 
 export const authRoutes = new Hono();
 
-const registerSchema = z.object({
-	email: z.email(),
-	password: z.string().min(8),
+const emailSchema = z.object({
+	email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
 });
 
-const forgotPasswordSchema = z.object({
-	email: z.email(),
+const registerSchema = emailSchema.extend({
+	password: z.string().min(8),
 });
 
 const resetPasswordSchema = z.object({
 	token: z.string(),
 	password: z.string().min(8),
+});
+
+const googleAuthSchema = z.object({
+	idToken: z.string(),
 });
 
 authRoutes.post('/register', zValidator('json', registerSchema), async (c) => {
@@ -92,7 +95,7 @@ authRoutes.post('/login', zValidator('json', registerSchema), async (c) => {
 	return c.json({ token, user: { id: user.id, email: user.email, isEmailValidated: user.isEmailValidated } });
 });
 
-authRoutes.post('/forgot-password', zValidator('json', forgotPasswordSchema), async (c) => {
+authRoutes.post('/forgot-password', zValidator('json', emailSchema), async (c) => {
 	const { email } = c.req.valid('json');
 
 	const user = await db.query.users.findFirst({
@@ -122,5 +125,60 @@ authRoutes.post('/reset-password', zValidator('json', resetPasswordSchema), asyn
 		return c.json({ message: 'Password successfully updated' }, 200);
 	} catch (e) {
 		return c.json({ error: 'Invalid or expired token' }, 401);
+	}
+});
+
+authRoutes.post('/google', zValidator('json', googleAuthSchema), async (c) => {
+	const { idToken } = c.req.valid('json');
+
+	try {
+		const googleResponse = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+
+		if (!googleResponse.ok) {
+			return c.json({ error: 'Invalid Google token' }, 401);
+		}
+
+		const googleData = await googleResponse.json();
+
+		if (googleData.aud !== process.env.GOOGLE_CLIENT_ID) {
+			return c.json({ error: 'Token audience mismatch' }, 401);
+		}
+
+		const { email, sub: providerId } = googleData;
+
+		const existingUser = await db.query.users.findFirst({
+			where: eq(users.email, email),
+		});
+
+		let authUserId: string;
+		let authUserEmail: string | null;
+		let authUserValidated: boolean | null;
+
+		if (existingUser) {
+			if (existingUser.provider !== 'google') {
+				return c.json({ error: 'Email already registered with a different provider' }, 409);
+			}
+			authUserId = existingUser.id;
+			authUserEmail = existingUser.email;
+			authUserValidated = existingUser.isEmailValidated;
+		} else {
+			const [newUser] = await db.insert(users).values({
+				email,
+				provider: 'google',
+				providerId,
+				isEmailValidated: true,
+			}).returning({ id: users.id, email: users.email, isEmailValidated: users.isEmailValidated });
+
+			authUserId = newUser.id;
+			authUserEmail = newUser.email;
+			authUserValidated = newUser.isEmailValidated;
+		}
+
+		const token = await sign({ id: authUserId, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 }, process.env.JWT_SECRET!);
+
+		return c.json({ token, user: { id: authUserId, email: authUserEmail, isEmailValidated: authUserValidated } }, 200);
+
+	} catch (error) {
+		return c.json({ error: 'Authentication failed' }, 500);
 	}
 });
