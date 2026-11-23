@@ -1,3 +1,5 @@
+export type SubscriptionPlan = 'FREE' | 'PREMIUM';
+
 export interface AccessTokenPayload {
 	sub: string;
 	sid: string;
@@ -10,10 +12,18 @@ export interface AuthTokens {
 	refreshToken: string;
 }
 
-export interface AuthUser {
+export interface UserProfileData {
+	publicInfo: Record<string, any>;
+	friendsInfo: Record<string, any>;
+	privateInfo: Record<string, any>;
+	musicPreferences: Record<string, any>;
+}
+
+export interface AuthUser extends UserProfileData {
 	id: string;
 	email: string;
 	isEmailValidated: boolean;
+	subscriptionPlan: SubscriptionPlan;
 }
 
 export interface AuthResponse {
