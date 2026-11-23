@@ -4,12 +4,10 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { authRoutes } from './routes/auth.routes.js';
 import { authMiddleware } from './middlewares/auth.js';
+import type { AccessTokenPayload } from '@musicroom/shared';
 
 type Variables = {
-	jwtPayload: {
-		id: string;
-		exp: number;
-	};
+	jwtPayload: AccessTokenPayload;
 };
 
 const app = new Hono<{ Variables: Variables }>();
@@ -21,7 +19,7 @@ app.route('/api/auth', authRoutes);
 
 app.get('/api/protected', authMiddleware, (c) => {
 	const payload = c.get('jwtPayload');
-	return c.json({ message: 'Access granted', userId: payload.id });
+	return c.json({ message: 'Access granted', userId: payload.sub });
 });
 
 const port = parseInt(process.env.PORT || '3000');
