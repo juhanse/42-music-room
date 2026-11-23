@@ -1,4 +1,3 @@
-import React from 'react';
 import { StyleSheet, Button } from 'react-native';
 import { ThemedView } from '../components/themed-view';
 import { ThemedText } from '../components/themed-text';
@@ -11,7 +10,9 @@ export default function HomeScreen() {
 	return (
 		<ThemedView style={styles.container}>
 			<ThemedText type="title" style={styles.title}>Music Room</ThemedText>
-			<ThemedText style={styles.subtitle}>Bienvenue, {user?.email}</ThemedText>
+			<ThemedText style={styles.subtitle}>
+				Bienvenue, {user?.email || user?.id}
+			</ThemedText>
 
 			<Button title="Se déconnecter" onPress={logout} color="#ff3b30" />
 		</ThemedView>
