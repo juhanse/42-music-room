@@ -13,7 +13,13 @@ clean:
 
 re: clean start
 
+install:
+	npm install
+
 logs:
 	docker compose -f docker-compose.yml logs -f
 
-.PHONY: all start stop clean re logs
+mobile:
+	cd mobile && npm run start
+
+.PHONY: all start stop clean re install logs mobile
