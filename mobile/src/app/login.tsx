@@ -40,7 +40,7 @@ export default function LoginScreen() {
 
 		try {
 			const response = await api.post('/auth/login', { email, password });
-			await login(response.data.token, response.data.user);
+			await login(response.data.tokens, response.data.user);
 			router.replace('/');
 		} catch (error: any) {
 			let message = 'Erreur réseau ou serveur injoignable';
