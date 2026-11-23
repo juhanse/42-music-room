@@ -4,6 +4,7 @@ export const users = pgTable('users', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	email: varchar('email', { length: 255 }).unique().notNull(),
 	isEmailValidated: boolean('is_email_validated').default(false),
+	subscriptionPlan: varchar('subscription_plan', { length: 50 }).default('FREE').notNull(),
 	publicInfo: jsonb('public_info').default({}),
 	friendsInfo: jsonb('friends_info').default({}),
 	privateInfo: jsonb('private_info').default({}),

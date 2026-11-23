@@ -32,10 +32,6 @@ const refreshSchema = z.object({
 	refreshToken: z.string(),
 });
 
-const verifyEmailSchema = z.object({
-	token: z.string(),
-});
-
 function generateRandomToken() {
 	return crypto.randomBytes(32).toString('hex');
 }
@@ -193,7 +189,19 @@ authRoutes.post('/login', zValidator('json', registerSchema), async (c) => {
 
 	const tokens = await createSession(user.id);
 
-	return c.json({ tokens, user: { id: user.id, email: user.email, isEmailValidated: user.isEmailValidated } });
+	return c.json({ 
+		tokens, 
+		user: { 
+			id: user.id, 
+			email: user.email, 
+			isEmailValidated: user.isEmailValidated,
+			subscriptionPlan: user.subscriptionPlan,
+			publicInfo: user.publicInfo,
+			friendsInfo: user.friendsInfo,
+			privateInfo: user.privateInfo,
+			musicPreferences: user.musicPreferences
+		} 
+	});
 });
 
 authRoutes.post('/refresh', zValidator('json', refreshSchema), async (c) => {
@@ -335,8 +343,19 @@ authRoutes.post('/google', zValidator('json', googleAuthSchema), async (c) => {
 
 		const tokens = await createSession(user.id);
 
-		return c.json({ tokens, user: { id: user.id, email: user.email, isEmailValidated: user.isEmailValidated } }, 200);
-
+		return c.json({ 
+			tokens, 
+			user: { 
+				id: user.id, 
+				email: user.email, 
+				isEmailValidated: user.isEmailValidated,
+				subscriptionPlan: user.subscriptionPlan,
+				publicInfo: user.publicInfo,
+				friendsInfo: user.friendsInfo,
+				privateInfo: user.privateInfo,
+				musicPreferences: user.musicPreferences
+			} 
+		});
 	} catch (error) {
 		return c.json({ error: 'Authentication failed' }, 500);
 	}
