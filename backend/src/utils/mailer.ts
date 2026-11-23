@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendValidationEmail = async (to: string, token: string) => {
-    const link = `http://localhost:3000/api/auth/validate?token=${token}`;
+    const link = `http://localhost:3000/api/auth/verify-email?token=${token}`;
 
     await transporter.sendMail({
         from: '"Music Room" <no-reply@musicroom.42.fr>',

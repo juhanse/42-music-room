@@ -107,8 +107,13 @@ authRoutes.post('/register', zValidator('json', registerSchema), async (c) => {
 	return c.json({ message: 'User created. Please validate email.', user: { id: newUser.id, email: newUser.email } }, 201);
 });
 
-authRoutes.post('/verify-email', zValidator('json', verifyEmailSchema), async (c) => {
-	const { token } = c.req.valid('json');
+authRoutes.get('/verify-email', async (c) => {
+	const token = c.req.query('token');
+	
+	if (!token) {
+		return c.json({ error: 'Missing token' }, 400);
+	}
+
 	const tokenHash = hashToken(token);
 
 	const record = await db.query.verificationTokens.findFirst({
