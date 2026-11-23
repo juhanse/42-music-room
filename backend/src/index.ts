@@ -2,6 +2,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { actionLogger } from './middlewares/actionLogger.js';
 import { authRoutes } from './routes/auth.routes.js';
 import { usersRoutes } from './routes/users.routes.js';
 import { authMiddleware } from './middlewares/auth.js';
@@ -10,6 +11,7 @@ import type { AccessTokenPayload } from '@musicroom/shared';
 const app = new Hono<{ Variables: { jwtPayload: AccessTokenPayload } }>();
 
 app.use('*', logger());
+app.use('*', actionLogger);
 app.use('*', cors());
 
 app.route('/api/auth', authRoutes);

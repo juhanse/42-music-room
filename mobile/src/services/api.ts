@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
+import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import { storage } from '../utils/storage';
 
 export const api = axios.create({
@@ -13,6 +16,11 @@ api.interceptors.request.use(async (config) => {
 	if (accessToken) {
 		config.headers.Authorization = `Bearer ${accessToken}`;
 	}
+
+	config.headers['X-Platform'] = Platform.OS;
+	config.headers['X-Device'] = Device.modelName || 'Unknown Device';
+	config.headers['X-App-Version'] = Constants.expoConfig?.version || '1.0.0';
+
 	return config;
 });
 
