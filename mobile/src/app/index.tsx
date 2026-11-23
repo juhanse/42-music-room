@@ -1,11 +1,23 @@
+import { useEffect } from 'react';
 import { StyleSheet, Button } from 'react-native';
 import { ThemedView } from '../components/themed-view';
 import { ThemedText } from '../components/themed-text';
 import { useAuthStore } from '../store/authStore';
 
 export default function HomeScreen() {
-	const user = useAuthStore((state) => state.user);
-	const logout = useAuthStore((state) => state.logout);
+	const { user, isLoading, checkAuth, logout } = useAuthStore();
+
+	useEffect(() => {
+		checkAuth();
+	}, []);
+
+	if (isLoading) {
+		return <ThemedText>Chargement...</ThemedText>;
+	}
+
+	if (!user) {
+		return <ThemedText>Non connecté</ThemedText>;
+	}
 
 	return (
 		<ThemedView style={styles.container}>
